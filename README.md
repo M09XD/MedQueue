@@ -1,4 +1,5 @@
 <div align="center">
+  
 # MedQueue
 
 > A multi-page hospital queue management demo for patients, doctors, and administrators — built with plain HTML, CSS, and JavaScript.
