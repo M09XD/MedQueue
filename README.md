@@ -1,3 +1,4 @@
+<div align="center">
 # MedQueue
 
 > A multi-page hospital queue management demo for patients, doctors, and administrators — built with plain HTML, CSS, and JavaScript.
@@ -7,6 +8,8 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES_Modules-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Status](https://img.shields.io/badge/status-demo%20%2F%20prototype-blue)](#known-limitations)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+</div>
 
 ## Table of Contents
 
