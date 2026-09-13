@@ -1,0 +1,20 @@
+/* Styles used only on the Admin Dashboard page. */
+.modal-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+.modal { width: 100%; max-width: 32rem; border-radius: var(--radius-lg); border: 1px solid var(--cyan-border); background: var(--surface); padding: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); }
+
+.chart-box { height: 320px; min-height: 0; border-radius: var(--radius-lg); border: 1px solid var(--border); background: rgba(15,23,42,0.6); padding: 1.25rem; overflow: hidden; }
+.chart-box h3 { font-size: 1rem; margin-bottom: 1rem; }
+.chart-box canvas { display: block; width: 100% !important; height: 240px !important; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 0.5rem; }
+.chart-legend span { display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: var(--text-muted); }
+.legend-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
+
+.report-item { border-radius: var(--radius-lg); border: 1px solid var(--border); background: rgba(15,23,42,0.6); transition: all 0.15s; }
+.report-item.expanded { border-color: var(--cyan-border); background: var(--surface); }
+.report-header { width: 100%; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; text-align: left; }
+.report-avatar { flex-shrink: 0; height: 40px; width: 40px; border-radius: 50%; background: var(--cyan-bg); border: 1px solid var(--cyan-border); display: flex; align-items: center; justify-content: center; color: var(--cyan-light); font-weight: 700; font-size: 0.875rem; font-family: var(--font-heading); }
+.report-body { padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+.report-detail-box { border-radius: var(--radius); border: 1px solid var(--border); background: rgba(30,41,59,0.5); padding: 1rem; }
+.report-detail-label { font-size: 0.75rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
+.chevron { transition: transform 0.2s; }
+.chevron.rotated { transform: rotate(180deg); }

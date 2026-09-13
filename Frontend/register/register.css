@@ -1,0 +1,4 @@
+/* Styles used only on the Register page. */
+.progress-steps { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+.progress-steps .seg { height: 4px; flex: 1; border-radius: var(--radius-full); background: rgba(255,255,255,0.1); }
+.progress-steps .seg.done { background: var(--cyan); }

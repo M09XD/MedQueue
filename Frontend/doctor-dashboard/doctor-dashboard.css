@@ -1,0 +1,13 @@
+/* Styles used only on the Doctor Dashboard page. */
+.stats-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+.stat-box { border-radius: var(--radius); border: 1px solid var(--border); background: rgba(15,23,42,0.6); padding: 0.75rem; text-align: center; }
+.stat-box .num { font-size: 1.25rem; font-weight: 700; color: #fff; font-family: var(--font-heading); }
+.stat-box .lbl { font-size: 0.75rem; color: var(--text-faint); }
+
+.queue-row { display: flex; align-items: center; justify-content: space-between; border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem; background: rgba(15,23,42,0.6); transition: all 0.2s; gap: 0.5rem; }
+.queue-row.emergency { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.08); }
+.queue-num-badge { flex-shrink: 0; height: 28px; width: 28px; border-radius: 50%; border: 1px solid var(--border); background: #1e293b; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+
+.doctor-header-photo { height: 56px; width: 56px; border-radius: var(--radius); object-fit: cover; background: #1e293b; border: 1px solid var(--border); flex-shrink: 0; }
+
+.pulse-dot { height: 6px; width: 6px; border-radius: 50%; background: var(--emerald); display: inline-block; animation: pulse 2s infinite; }

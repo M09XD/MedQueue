@@ -1,0 +1,7 @@
+/* This page is built almost entirely from shared components (.card,
+   .feature-icon, layout utilities) — there's nothing meaningfully
+   unique to this page's look, so this file only holds the one
+   layout tweak that's specific to how this page arranges its grid. */
+@media (min-width: 768px) {
+  #info-grid { grid-template-columns: 2fr 1fr !important; gap: 2rem !important; }
+}

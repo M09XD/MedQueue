@@ -1,0 +1,298 @@
+/* =========================================================
+   MedQueue — SHARED design system
+   Loaded by every page. Holds only what's genuinely common:
+   design tokens, resets, layout/utility helpers, and the small
+   set of components used on 2+ pages (buttons, badges, cards,
+   forms, table, nav, tabs, switch, icon sizing, empty state,
+   the auth-page shell used by both Login and Register, and the
+   doctor card used on Homepage, Doctors, and Patient Dashboard).
+   Anything used by only ONE page lives in that page's own
+   <page>.css instead — see that folder.
+   ========================================================= */
+
+/* ---------- 1. Variables ---------- */
+:root {
+  --bg: #020817;
+  --surface: #0f172a;       /* slate-900 */
+  --surface-soft: rgba(15, 23, 42, 0.6);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f8fafc;          /* slate-50 */
+  --text-muted: #94a3b8;    /* slate-400 */
+  --text-faint: #64748b;    /* slate-500 */
+
+  --cyan: #06b6d4;
+  --cyan-light: #22d3ee;
+  --cyan-bg: rgba(6, 182, 212, 0.15);
+  --cyan-border: rgba(6, 182, 212, 0.3);
+
+  --red: #f87171;
+  --red-bg: rgba(239, 68, 68, 0.2);
+  --red-border: rgba(239, 68, 68, 0.4);
+
+  --emerald: #34d399;
+  --emerald-bg: rgba(16, 185, 129, 0.15);
+  --emerald-border: rgba(16, 185, 129, 0.3);
+
+  --amber: #fbbf24;
+  --amber-bg: rgba(245, 158, 11, 0.15);
+  --amber-border: rgba(245, 158, 11, 0.3);
+
+  --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+}
+
+/* ---------- 2. Reset ---------- */
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4 { font-family: var(--font-heading); margin: 0; font-weight: 800; color: var(--text); }
+p { margin: 0; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: none; }
+ul { list-style: none; margin: 0; padding: 0; }
+table { border-collapse: collapse; width: 100%; }
+#app { min-height: 100%; }
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--cyan-light);
+  outline-offset: 2px;
+}
+
+/* ---------- 3. Layout & utility helpers ---------- */
+.container { max-width: 1280px; margin: 0 auto; padding: 0 1rem; }
+@media (min-width: 768px) { .container { padding: 0 2rem; } }
+
+.page { min-height: 100vh; padding-top: 5rem; padding-bottom: 4rem; }
+.page-narrow { max-width: 960px; margin: 0 auto; padding: 0 1rem; }
+.page-medium { max-width: 1024px; margin: 0 auto; padding: 0 1rem; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-1 { gap: 0.25rem; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.flex-1 { flex: 1; }
+
+.grid { display: grid; gap: 1.25rem; }
+.grid-2 { grid-template-columns: repeat(1, 1fr); }
+.grid-3 { grid-template-columns: repeat(1, 1fr); }
+.grid-4 { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 640px) {
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) {
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+.text-center { text-align: center; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.mb-8 { margin-bottom: 2rem; }
+.hidden { display: none !important; }
+@media (min-width: 768px) { .md-block { display: block !important; } .md-flex { display: flex !important; } .md-hidden { display: none !important; } }
+
+.muted { color: var(--text-muted); }
+.faint { color: var(--text-faint); }
+.cyan-text { color: var(--cyan-light); }
+.text-amber { color: var(--amber); }
+.text-red { color: var(--red); }
+.text-emerald { color: var(--emerald); }
+.small { font-size: 0.8125rem; }
+.xs { font-size: 0.75rem; }
+
+/* Large page-title style — reused as-is on Homepage's hero and, with an
+   inline font-size override, as the page heading on Doctors / Hospital Info. */
+.hero-title { font-weight: 800; color: #fff; margin-bottom: 1.5rem; line-height: 0.9; font-size: clamp(2.5rem, 8vw, 6rem); }
+
+/* ---------- 4. Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-weight: 600; border-radius: var(--radius); transition: all 0.15s ease;
+  border: 1px solid transparent; white-space: nowrap;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; min-height: 36px; }
+.btn-md { padding: 0.625rem 1.25rem; font-size: 0.875rem; min-height: 44px; }
+.btn-lg { padding: 0.875rem 1.75rem; font-size: 1rem; min-height: 52px; }
+.btn-primary { background: var(--cyan); color: #04202a; box-shadow: 0 8px 20px -4px rgba(6, 182, 212, 0.35); }
+.btn-primary:hover:not(:disabled) { background: var(--cyan-light); transform: scale(1.03); }
+.btn-ghost { background: transparent; color: var(--text-muted); }
+.btn-ghost:hover:not(:disabled) { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.btn-outline { border-color: var(--cyan-border); color: var(--cyan-light); background: transparent; }
+.btn-outline:hover:not(:disabled) { background: var(--cyan-bg); border-color: var(--cyan-light); }
+.btn-danger { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+.btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.3); }
+.btn-block { width: 100%; }
+.icon-btn { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+/* ---------- 5. Badges ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: 0.25rem; border-radius: var(--radius-full);
+  border: 1px solid; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 500;
+}
+.badge-default { background: var(--cyan-bg); color: var(--cyan-light); border-color: var(--cyan-border); }
+.badge-emergency { background: var(--red-bg); color: var(--red); border-color: var(--red-border); animation: pulse 2s infinite; }
+.badge-success { background: var(--emerald-bg); color: var(--emerald); border-color: var(--emerald-border); }
+.badge-warning { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+.badge-muted { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border-color: var(--border); }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* ---------- 6. Cards ---------- */
+.card { border: 1px solid var(--border); background: var(--surface-soft); border-radius: var(--radius-lg); }
+.card-pad { padding: 1.25rem; }
+.card-solid { background: var(--surface); }
+
+/* ---------- 7. Forms ---------- */
+.field { margin-bottom: 1rem; }
+.field:last-child { margin-bottom: 0; }
+.label { display: block; font-size: 0.875rem; font-weight: 500; color: #cbd5e1; margin-bottom: 0.375rem; }
+.label-xs { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+.input, select.input, textarea.input {
+  width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05); padding: 0.75rem 1rem; font-size: 0.875rem;
+  color: #fff; min-height: 44px; transition: border-color 0.15s, box-shadow 0.15s;
+}
+select.input { background-color: #1e293b; }
+textarea.input { min-height: auto; resize: vertical; }
+.input::placeholder { color: var(--text-faint); }
+.input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.4); }
+.input-error { border-color: rgba(239, 68, 68, 0.5); }
+.error-text { margin-top: 0.25rem; font-size: 0.75rem; color: var(--red); }
+.error-banner { font-size: 0.875rem; color: var(--red); display: flex; align-items: center; gap: 0.25rem; }
+
+/* ---------- 8. Table ---------- */
+.table-wrap { border: 1px solid var(--border); background: var(--surface-soft); border-radius: var(--radius-lg); overflow: hidden; overflow-x: auto; }
+table.data-table { font-size: 0.875rem; min-width: 480px; }
+.data-table thead tr { border-bottom: 1px solid var(--border); }
+.data-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+.data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+.data-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.text-right { text-align: right; }
+
+/* ---------- 9. Nav ---------- */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+  border-bottom: 1px solid var(--cyan-border); background: rgba(2, 8, 23, 0.8); backdrop-filter: blur(20px);
+}
+.nav-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; }
+@media (min-width: 768px) { .nav-row { padding: 0.75rem 2rem; } }
+.brand { display: flex; align-items: center; gap: 0.625rem; }
+.brand-mark { display: flex; height: 32px; width: 32px; align-items: center; justify-content: center; border-radius: var(--radius); background: var(--cyan-bg); border: 1px solid var(--cyan-border); }
+.brand-name { font-family: var(--font-heading); font-weight: 700; color: #fff; }
+.nav-links { display: none; align-items: center; gap: 0.25rem; }
+.nav-actions { display: none; align-items: center; gap: 0.5rem; }
+@media (min-width: 768px) { .nav-links, .nav-actions { display: flex; } }
+.nav-link { border-radius: var(--radius); padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); transition: color 0.15s, background 0.15s; }
+.nav-link:hover { color: #fff; }
+.nav-link.active { background: var(--cyan-bg); color: var(--cyan-light); }
+.nav-burger { display: inline-flex; padding: 0.5rem; border-radius: var(--radius); color: var(--text-muted); min-height: 44px; min-width: 44px; align-items: center; justify-content: center; }
+@media (min-width: 768px) { .nav-burger { display: none; } }
+.nav-mobile { border-top: 1px solid var(--cyan-border); background: rgba(2, 8, 23, 0.95); padding: 1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+@media (min-width: 768px) { .nav-mobile { display: none; } }
+.nav-mobile-link { display: block; width: 100%; text-align: left; border-radius: var(--radius-lg); padding: 0.75rem 1rem; font-size: 0.875rem; font-weight: 500; color: #cbd5e1; min-height: 44px; }
+.nav-mobile-link:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.nav-mobile-actions { padding-top: 0.5rem; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; gap: 0.5rem; }
+
+/* ---------- 10. Tabs ---------- */
+.tabs { display: inline-flex; flex-wrap: wrap; gap: 0.25rem; border-radius: var(--radius); background: var(--surface-soft); border: 1px solid var(--border); padding: 0.25rem; margin-bottom: 1.5rem; }
+.tab { border-radius: var(--radius-sm); padding: 0.5rem 1.25rem; font-size: 0.875rem; font-weight: 500; text-transform: capitalize; color: var(--text-muted); min-height: 40px; }
+.tab.active { background: var(--cyan); color: #04202a; }
+.tab:hover:not(.active) { color: #fff; }
+
+/* ---------- 11. Toggle switch ---------- */
+.switch { position: relative; display: inline-flex; height: 28px; width: 48px; align-items: center; border-radius: var(--radius-full); background: #334155; transition: background 0.15s; flex-shrink: 0; }
+.switch.on { background: var(--cyan); }
+.switch-knob { display: inline-block; height: 20px; width: 20px; transform: translateX(4px); border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); transition: transform 0.15s; }
+.switch.on .switch-knob { transform: translateX(24px); }
+
+/* ---------- 12. Icon sizing (used with lucide <i data-lucide>) ---------- */
+[data-lucide] { display: inline-block; vertical-align: -3px; }
+.ic-xs { width: 12px; height: 12px; }
+.ic-sm { width: 14px; height: 14px; }
+.ic-base { width: 16px; height: 16px; }
+.ic-md { width: 20px; height: 20px; }
+.ic-lg { width: 24px; height: 24px; }
+.ic-xl { width: 32px; height: 32px; }
+.ic-2xl { width: 48px; height: 48px; }
+.ic-hero { width: 96px; height: 96px; }
+
+/* ---------- 13. Glow decoration (ui.js's cyanGlow(), used on Homepage/Login/Register) ---------- */
+.section-glow { position: absolute; pointer-events: none; border-radius: 50%; background: rgba(6,182,212,0.1); filter: blur(64px); }
+
+/* ---------- 14. Feature icon box (used on Homepage and Hospital Info) ---------- */
+.feature-icon { height: 48px; width: 48px; border-radius: var(--radius); background: var(--cyan-bg); border: 1px solid var(--cyan-border); display: flex; align-items: center; justify-content: center; color: var(--cyan-light); margin-bottom: 1rem; }
+
+/* ---------- 15. Empty state (Doctors / Patient / Admin) ---------- */
+.empty { text-align: center; padding: 4rem 0; color: var(--text-faint); }
+.empty [data-lucide] { opacity: 0.3; margin-bottom: 1rem; }
+.empty-title { font-size: 1.125rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+/* ---------- 16. Auth page shell (used by both Login and Register) ---------- */
+.auth-wrap { min-height: 100vh; padding-top: 5rem; display: flex; align-items: center; justify-content: center; padding-left: 1rem; padding-right: 1rem; }
+.auth-box { width: 100%; max-width: 28rem; }
+.auth-card { position: relative; border-radius: var(--radius-lg); border: 1px solid var(--border); background: rgba(15,23,42,0.8); padding: 2rem; overflow: hidden; }
+.auth-glow { position: absolute; top: -2rem; left: 50%; transform: translateX(-50%); height: 8rem; width: 16rem; border-radius: 50%; background: rgba(6,182,212,0.1); filter: blur(48px); pointer-events: none; }
+.auth-title { font-weight: 800; color: #fff; font-size: 1.5rem; margin-bottom: 0.25rem; }
+.auth-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
+.role-switch { display: flex; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+.role-switch button { flex: 1; padding: 0.5rem; font-size: 0.875rem; font-weight: 500; text-transform: capitalize; color: var(--text-muted); min-height: 40px; }
+.role-switch button.active { background: var(--cyan); color: #04202a; }
+.auth-footer { margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: var(--text-muted); }
+.link-btn { color: var(--cyan-light); font-weight: 500; }
+.link-btn:hover { text-decoration: underline; }
+
+/* ---------- 17. Doctor card (Homepage, Doctors, Patient Dashboard) ---------- */
+.doctor-card { border-radius: var(--radius-xl); overflow: hidden; border: 1px solid var(--border); background: rgba(15, 23, 42, 0.8); transition: transform 0.15s ease-out, border-color 0.2s; transform-style: preserve-3d; }
+.doctor-card:hover { border-color: var(--cyan-border); }
+.doctor-photo-wrap { position: relative; height: 176px; background: #1e293b; overflow: hidden; }
+.doctor-photo-wrap img { height: 100%; width: 100%; object-fit: cover; }
+.doctor-photo-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.8), transparent 60%); }
+.doctor-photo-badge { position: absolute; bottom: 0.75rem; left: 0.75rem; }
+.doctor-card-body { padding: 1rem; }
+.doctor-name { font-weight: 700; color: #fff; margin-bottom: 0.125rem; font-family: var(--font-heading); }
+.doctor-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+.doctor-stats { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.75rem; color: var(--text-muted); }
+.doctor-stats span { display: flex; align-items: center; gap: 0.25rem; }
+
+/* ---------- 18. Dashboard header (Patient / Doctor / Admin dashboards) ---------- */
+.dash-header { display: flex; flex-direction: column; gap: 1rem; justify-content: space-between; margin-bottom: 1.5rem; }
+@media (min-width: 768px) { .dash-header { flex-direction: row; align-items: center; } }
+.dash-title { font-weight: 800; color: #fff; font-size: 1.5rem; }
+@media (min-width: 768px) { .dash-title { font-size: 1.875rem; } }
+
+@media print {
+  .nav, .btn, .tabs { display: none !important; }
+  body { background: #fff; color: #000; }
+}
