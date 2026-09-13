@@ -31,11 +31,14 @@
 - [License](#license)
 - [Contact](#contact)
 
+<div align="center">
+
 ## Preview
+| Home Page|
+|-----------|
+| ![MedQueue preview](docs/gifs/landing-page.gif) |
 
-<!-- Drop a hero screenshot or GIF here: full-width landing page (homepage/homepage.html) showing the hero section and navigation. Suggested filename: docs/screenshots/hero.png -->
-
-![MedQueue preview — add screenshot](docs/screenshots/hero.png)
+</div>
 
 ## About
 
@@ -61,6 +64,16 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
 - **Appointment history** — table of past and active tokens for the current browser session
 - **Profile strip** — displays name, email, phone, condition, patient ID, and join date
 
+<div align="center">
+  
+#### Screenshots
+
+| Dashboard | Hospital Info | Doctor List | Queue Token |
+|-----------|---------------|-------------|-------------|
+| ![Patient Dashboard](docs/screenshots/patient-dashboard.png) | ![Hospital Info](docs/screenshots/hospital-info.png) | ![Doctor Directory](docs/screenshots/doctor-directory.png) | ![Queue Token](docs/screenshots/patient-token-queue.png) |
+
+</div>
+
 ### Doctor
 
 - **Queue management** — view current in-progress patient and waiting queue; call next, complete, skip, or flag as emergency
@@ -69,6 +82,17 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
 - **Availability toggle** — mark available or unavailable (stops simulated arrivals when unavailable)
 - **Appointment history** — session completions plus seeded sample reports for the logged-in doctor
 - **Availability settings** — configure start/end times and optional unavailable blocks (saved to the doctor session in `localStorage`)
+
+<div align="center">
+  
+#### Screenshots
+
+| Dashboard | Patient History |
+|-----------|-----------------|
+| ![Patient Dashboard](docs/screenshots/doctor-dashboard.png) | ![Hospital Info](docs/screenshots/doctor-history.png) |
+
+</div>
+
 
 ### Admin
 
@@ -80,22 +104,16 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
 - **Analytics** — wait-time and weekly volume charts; doctor performance table
 - **Export** — triggers the browser print dialog (`window.print()`)
 
-## Screenshots
+<div align="center">
+  
+#### Screenshots
 
-<!-- Homepage: docs/screenshots/homepage.png -->
-![Homepage](docs/screenshots/homepage.png)
+| Dashboard | Patient Report | Queue Analytics |
+|-----------|----------------|-----------------|
+| ![Patient Dashboard](docs/screenshots/admin-dashboard.png) | ![Hospital Info](docs/screenshots/admin-patient-report.png) | ![Doctor Directory](docs/screenshots/admin-queue-analytics.png) |
 
-<!-- Doctor Directory: docs/screenshots/doctors.png -->
-![Doctor Directory](docs/screenshots/doctors.png)
+</div>
 
-<!-- Patient Dashboard (queue tracking): docs/screenshots/patient-dashboard.png -->
-![Patient Dashboard](docs/screenshots/patient-dashboard.png)
-
-<!-- Doctor Dashboard: docs/screenshots/doctor-dashboard.png -->
-![Doctor Dashboard](docs/screenshots/doctor-dashboard.png)
-
-<!-- Admin Dashboard: docs/screenshots/admin-dashboard.png -->
-![Admin Dashboard](docs/screenshots/admin-dashboard.png)
 
 ## Tech Stack
 
