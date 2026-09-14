@@ -68,9 +68,21 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
   
 #### Screenshots
 
-| Dashboard | Hospital Info | Doctor List | Queue Token |
-|-----------|---------------|-------------|-------------|
-| ![Patient Dashboard](docs/screenshots/patient-dashboard.png) | ![Hospital Info](docs/screenshots/hospital-info.png) | ![Doctor Directory](docs/screenshots/doctor-directory.png) | ![Queue Token](docs/screenshots/patient-token-queue.png) |
+| Dashboard |
+|-----------|
+| ![Patient Dashboard](docs/screenshots/patient-dashboard.png) |
+
+| Hospital Info |
+|---------------|
+| ![Hospital Info](docs/screenshots/hospital-info.png) |
+
+| Doctor List |
+|-------------|
+| ![Doctor Directory](docs/screenshots/doctor-directory.png) |
+
+| Queue Token |
+|-------------|
+| ![Queue Token](docs/screenshots/patient-token-queue.png) |
 
 </div>
 
@@ -87,9 +99,13 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
   
 #### Screenshots
 
-| Dashboard | Patient History |
-|-----------|-----------------|
-| ![Patient Dashboard](docs/screenshots/doctor-dashboard.png) | ![Hospital Info](docs/screenshots/doctor-history.png) |
+| Dashboard |
+|-----------|
+| ![Patient Dashboard](docs/screenshots/doctor-dashboard.png) |
+
+| Patient History |
+|-----------------|
+| ![Hospital Info](docs/screenshots/doctor-history.png) |
 
 </div>
 
@@ -108,9 +124,17 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
   
 #### Screenshots
 
-| Dashboard | Patient Report | Queue Analytics |
-|-----------|----------------|-----------------|
-| ![Patient Dashboard](docs/screenshots/admin-dashboard.png) | ![Hospital Info](docs/screenshots/admin-patient-report.png) | ![Doctor Directory](docs/screenshots/admin-queue-analytics.png) |
+| Dashboard |
+|-----------|
+| ![Patient Dashboard](docs/screenshots/admin-dashboard.png) |
+
+| Patient Report |
+|----------------|
+|![Hospital Info](docs/screenshots/admin-patient-report.png) |
+
+| Queue Analytics |
+|-----------------|
+|![Doctor Directory](docs/screenshots/admin-queue-analytics.png) |
 
 </div>
 
