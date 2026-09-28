@@ -350,6 +350,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 **Mahim** — project maintainer
 
-- Email: [mmahim2320084@bscse.uiu.ac.bd](mailto:mmahim2320084@bscse.uiu.ac.bd)
 - GitHub: [@m09xd](https://github.com/m09xd)
-- Repository: [github.com/m09xd/MedQueue](https://github.com/m09xd/MedQueue)

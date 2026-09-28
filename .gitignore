@@ -21,3 +21,9 @@ npm-debug.log*
 
 # Dependencies (if added later)
 node_modules/
+vendor/
+
+# Backend runtime files
+Backend/.env
+Backend/storage/cache/
+Backend/storage/logs/

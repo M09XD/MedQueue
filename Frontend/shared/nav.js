@@ -1,6 +1,7 @@
 import { getUser, clearUser } from "./store.js";
 import { icon, refreshIcons } from "./icons.js";
 import { badge, btn } from "./ui.js";
+import { apiFetch } from "./api.js";
 
 const GUEST_LINKS = [
   { label: "Doctors", href: "../doctors/doctors.html", key: "doctors" },
@@ -18,13 +19,10 @@ function linksForRole(role) {
   return GUEST_LINKS;
 }
 
-// Mounts the nav bar into #nav-root and wires its own (tiny, local)
-// interactivity — the mobile-menu toggle and the logout button.
-// `currentPageKey` (e.g. "doctors", "homepage") is used to highlight
-// the active link; every page calls this once on load.
 export function mountNav(currentPageKey) {
   const root = document.getElementById("nav-root");
   let mobileOpen = false;
+  let loggingOut = false;
 
   function draw() {
     const stored = getUser();
@@ -36,12 +34,12 @@ export function mountNav(currentPageKey) {
 
     const desktopAuth = role
       ? `${badge(role, "default")}
-         ${btn({ label: `${icon("log-out", "ic-base")} Log out`, variant: "ghost", size: "sm", attrs: 'data-nav-action="logout"' })}`
+         ${btn({ label: loggingOut ? "Logging out..." : `${icon("log-out", "ic-base")} Log out`, variant: "ghost", size: "sm", attrs: loggingOut ? "disabled" : 'data-nav-action="logout"' })}`
       : `${btn({ label: `${icon("log-in", "ic-base")} Log in`, variant: "ghost", size: "sm", href: "../login/login.html" })}
          ${btn({ label: "Register", variant: "primary", size: "sm", href: "../register/register.html" })}`;
 
     const mobileAuth = role
-      ? btn({ label: `${icon("log-out", "ic-base")} Log out`, variant: "ghost", size: "sm", block: true, attrs: 'data-nav-action="logout"' })
+      ? btn({ label: loggingOut ? "Logging out..." : `${icon("log-out", "ic-base")} Log out`, variant: "ghost", size: "sm", block: true, attrs: loggingOut ? "disabled" : 'data-nav-action="logout"' })
       : `${btn({ label: "Log in", variant: "ghost", size: "sm", block: true, href: "../login/login.html" })}
          ${btn({ label: "Register", variant: "primary", size: "sm", block: true, href: "../register/register.html" })}`;
 
@@ -74,10 +72,18 @@ export function mountNav(currentPageKey) {
     refreshIcons();
   }
 
-  root.addEventListener("click", (e) => {
+  root.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-nav-action]");
     if (!el) return;
-    if (el.dataset.navAction === "logout") {
+
+    if (el.dataset.navAction === "logout" && !loggingOut) {
+      loggingOut = true;
+      draw();
+      try {
+        await apiFetch('/auth/logout', { method: 'POST', body: {} });
+      } catch {
+        // local logout still proceeds even if backend request fails
+      }
       clearUser();
       location.href = "../homepage/homepage.html";
     } else if (el.dataset.navAction === "toggle-mobile") {

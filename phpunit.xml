@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="Backend/tests/bootstrap.php" colors="true" cacheDirectory="Backend/storage/cache/phpunit">
+  <testsuites>
+    <testsuite name="MedQueue Backend Tests">
+      <directory>Backend/tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

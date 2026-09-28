@@ -1,28 +1,40 @@
 import { icon, refreshIcons } from "../shared/icons.js";
 import { btn, cyanGlow } from "../shared/ui.js";
-import { DOCTOR_EMAILS } from "../shared/data.js";
-import { getDoctors, setUser } from "../shared/store.js";
+import { setUser } from "../shared/store.js";
 import { mountNav } from "../shared/nav.js";
+import { apiFetch, ensureCsrfToken } from "../shared/api.js";
 
 mountNav("login");
 
-let role = "patient";
+let roleHint = "patient";
 let error = "";
-let draft = { email: "", name: "", pass: "" };
+let loading = false;
+let draft = { email: "", pass: "" };
 
 function captureDraft() {
-  const nameEl = document.getElementById("login-name");
   const emailEl = document.getElementById("login-email");
   const passEl = document.getElementById("login-pass");
-  if (nameEl) draft.name = nameEl.value;
   if (emailEl) draft.email = emailEl.value;
   if (passEl) draft.pass = passEl.value;
 }
 
+function destinationForRole(role) {
+  if (role === "doctor") return "../doctor-dashboard/doctor-dashboard.html";
+  if (role === "admin") return "../admin-dashboard/admin-dashboard.html";
+  return "../patient-dashboard/patient-dashboard.html";
+}
+
 function render() {
   const roleButtons = ["patient", "doctor", "admin"]
-    .map((r) => `<button class="${role === r ? "active" : ""}" data-action="set-role" data-role="${r}">${r}</button>`)
+    .map((r) => `<button type="button" class="${roleHint === r ? "active" : ""}" data-action="set-role" data-role="${r}">${r}</button>`)
     .join("");
+
+  const roleHintText =
+    roleHint === "doctor"
+      ? `<div class="auth-hint"><span class="cyan-text" style="font-weight:500;">Doctor login:</span> use your hospital account credentials.</div>`
+      : roleHint === "admin"
+        ? `<div class="auth-hint"><span class="cyan-text" style="font-weight:500;">Admin login:</span> sign in with the seeded admin account or your admin credentials.</div>`
+        : "";
 
   document.getElementById("page-root").innerHTML = `
     <div class="auth-wrap">
@@ -33,34 +45,19 @@ function render() {
           <p class="auth-sub">Sign in to access your dashboard</p>
 
           <div class="role-switch">${roleButtons}</div>
+          ${roleHintText}
 
           <form data-form="login" novalidate>
-            ${
-              role === "patient"
-                ? `<div class="field">
-                     <label class="label" for="login-name">Full Name</label>
-                     <input class="input" id="login-name" type="text" value="${draft.name}" placeholder="Your full name" />
-                   </div>`
-                : ""
-            }
-            ${
-              role === "doctor"
-                ? `<div class="auth-hint">
-                     <span class="cyan-text" style="font-weight:500;">Doctor login:</span> Use your hospital email (e.g.
-                     <span class="mono">sarah.chen@medqueue.hospital</span>). Your profile is identified automatically.
-                   </div>`
-                : ""
-            }
             <div class="field">
               <label class="label" for="login-email">Email</label>
-              <input class="input" id="login-email" type="email" value="${draft.email}" placeholder="you@example.com" />
+              <input class="input" id="login-email" type="email" value="${draft.email}" placeholder="you@example.com" ${loading ? "disabled" : ""} />
             </div>
             <div class="field">
               <label class="label" for="login-pass">Password</label>
-              <input class="input" id="login-pass" type="password" value="${draft.pass}" placeholder="••••••••" />
+              <input class="input" id="login-pass" type="password" value="${draft.pass}" placeholder="••••••••" ${loading ? "disabled" : ""} />
             </div>
             ${error ? `<p class="error-banner" role="alert">${icon("alert-triangle", "ic-sm")} ${error}</p>` : ""}
-            ${btn({ label: "Sign In", variant: "primary", size: "lg", block: true, type: "submit" })}
+            ${btn({ label: loading ? `${icon("loader", "ic-sm")} Signing in...` : "Sign In", variant: "primary", size: "lg", block: true, type: "submit", attrs: loading ? "disabled" : "" })}
           </form>
 
           <p class="auth-footer">
@@ -75,46 +72,65 @@ function render() {
 
 document.getElementById("page-root").addEventListener("click", (e) => {
   const el = e.target.closest("[data-action]");
-  if (!el || el.dataset.action !== "set-role") return;
+  if (!el || el.dataset.action !== "set-role" || loading) return;
   captureDraft();
-  role = el.dataset.role;
+  roleHint = el.dataset.role;
   error = "";
   render();
 });
 
-document.getElementById("page-root").addEventListener("submit", (e) => {
+document.getElementById("page-root").addEventListener("submit", async (e) => {
   const form = e.target.closest('[data-form="login"]');
-  if (!form) return;
+  if (!form || loading) return;
   e.preventDefault();
   captureDraft();
 
-  const { email, name, pass } = draft;
-  if (!email || !pass) { error = "Please fill in all fields."; render(); return; }
-  if (role === "patient" && !name.trim()) { error = "Please enter your name."; render(); return; }
-
-  const doctors = getDoctors();
-  let profile;
-  let destination;
-
-  if (role === "patient") {
-    profile = {
-      name: name.trim(), email, phone: "", condition: "",
-      patientId: `PAT-${Math.floor(1000 + Math.random() * 9000)}`,
-      joinedDate: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-    };
-    destination = "../patient-dashboard/patient-dashboard.html";
-  } else if (role === "doctor") {
-    const doctorId = DOCTOR_EMAILS[email.toLowerCase().trim()] ?? doctors[0].id;
-    const doc = doctors.find((d) => d.id === doctorId) ?? doctors[0];
-    profile = { name: doc.name, email, phone: "", condition: "", patientId: "", joinedDate: "", doctorId: doc.id };
-    destination = "../doctor-dashboard/doctor-dashboard.html";
-  } else {
-    profile = { name: "Admin", email, phone: "", condition: "", patientId: "", joinedDate: "" };
-    destination = "../admin-dashboard/admin-dashboard.html";
+  const { email, pass } = draft;
+  if (!email || !pass) {
+    error = "Please fill in email and password.";
+    render();
+    return;
   }
 
-  setUser(role, profile);
-  location.href = destination;
+  loading = true;
+  error = "";
+  render();
+
+  try {
+    await ensureCsrfToken();
+    const response = await apiFetch('/auth/login', {
+      method: 'POST',
+      body: { email, password: pass },
+    });
+
+    const user = response.data?.user;
+    if (!user) throw new Error('Login response missing user payload.');
+
+    if (roleHint && roleHint !== user.role) {
+      error = `Signed in as ${user.role}. Redirecting to the correct dashboard.`;
+    }
+
+    setUser(user.role, {
+      name: user.name,
+      email: user.email,
+      phone: user.phone || "",
+      condition: "",
+      patientId: user.role === "patient" ? `PAT-${String(user.id).padStart(4, "0")}` : "",
+      joinedDate: new Date(user.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+      doctorId: user.role === "doctor" ? user.id : undefined,
+      userId: user.id,
+    });
+
+    loading = false;
+    render();
+    setTimeout(() => {
+      location.href = destinationForRole(user.role);
+    }, 250);
+  } catch (err) {
+    loading = false;
+    error = err?.message || "Unable to sign in.";
+    render();
+  }
 });
 
 render();
