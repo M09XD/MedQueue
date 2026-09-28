@@ -44,7 +44,7 @@
 
 MedQueue is a browser-based hospital queue management system that lets patients browse doctors, receive digital queue tokens, and track their position; lets doctors manage a live waiting queue during a shift; and gives administrators tools to manage doctors, specialties, and view sample patient reports.
 
-The application is a **frontend-only prototype**. It uses separate HTML pages (not a single-page app framework), native ES modules for JavaScript, and `localStorage` to share state between pages. There is no server-side backend, database, or build step in this repository.
+The application uses separate HTML pages (not a single-page app framework), native ES modules for JavaScript, and a lightweight frameworkless PHP backend API for authentication and queue operations. The frontend still uses `localStorage` for some cached UI state while server state is introduced incrementally.
 
 ## Features
 
@@ -152,8 +152,8 @@ The application is a **frontend-only prototype**. It uses separate HTML pages (n
 | Images | [Unsplash](https://unsplash.com/) | Doctor portrait URLs in seed data and cards |
 | State | `localStorage` | Session, doctors, specialties, tokens, doctor sessions |
 | Seed data | `Frontend/shared/data.js` | Doctors, specialties, reports, analytics mock data |
-| Build tools | None | No `package.json`, npm scripts, or compilation step |
-| Backend | None (in repo) | `Backend/` directory exists but is empty |
+| Build tools | None | No `package.json`, npm scripts, or frontend compilation step |
+| Backend | PHP 8 (frameworkless) | JSON API in `Backend/public` with layered source under `Backend/src` |
 
 ## Architecture
 
@@ -178,7 +178,7 @@ Browser
         └── Unsplash doctor photos
 ```
 
-There are **no `fetch()` calls**, REST endpoints, WebSockets, or database connections in the current codebase.
+Frontend pages now call backend REST-style JSON endpoints through `Frontend/shared/api.js`. WebSockets are still not used; queue updates are currently polling/timer-based.
 
 ## User Roles
 
@@ -269,7 +269,7 @@ MedQueue/
 │   ├── doctor-dashboard/     # Doctor queue management
 │   ├── admin-dashboard/      # Admin panel, charts, CRUD
 │   └── shared/               # Design system, store, seed data, shared components
-├── Backend/                  # Empty placeholder (no server code in repo)
+├── Backend/                  # Frameworkless PHP API (serve Backend/public)
 └── README.md
 ```
 
@@ -314,14 +314,14 @@ All paths are relative to `Frontend/`.
 | Doctor shift queue | Doctor dashboard | `localStorage` key `medqueue.doctorSession` |
 | Pending doctor (Doctors → Patient Dashboard handoff) | Doctors page | `localStorage` key `medqueue.pendingDoctorId` |
 
-There is **no server API** and **no real database**. Clearing browser storage resets mutable data to seed defaults on next load. Patient and doctor queues are **independent simulations** — a token a patient books is not inserted into the doctor's live queue.
+The repository now includes a backend API and SQL schema/seed files under `Backend/database/`. Some legacy UI modules still cache data in `localStorage` while API integration is being completed across all pages.
 
 ## Known Limitations
 
 This repository is a **frontend demo / prototype**, not a production hospital system.
 
-- **No backend** — the `Backend/` folder is empty; all logic runs in the browser
-- **Demo authentication** — passwords are not validated; doctor/admin access is not securely enforced
+- **Partial migration** — backend API exists, but some pages still rely on legacy frontend-only cache/state behavior
+- **Demo security posture** — this remains a course/demo system, not production-grade identity or compliance infrastructure
 - **No real-time sync** — queue position changes use client-side timers; patient and doctor views are not connected
 - **Simulated data** — admin overview stats, analytics charts, and many homepage figures are hardcoded mock values
 - **Admin token config** — the Config tab renders inputs but does not persist or apply settings

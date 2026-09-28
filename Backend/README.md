@@ -1,26 +1,38 @@
 # MedQueue API (frameworkless PHP)
 
-JSON API for the existing Frontend. Serve `public/` as the only web-reachable PHP directory.
+This backend provides JSON endpoints used by the existing frontend pages.
+Only `Backend/public/` should be web-accessible.
 
-## Local (PHP built-in server)
+## Local run (PHP built-in server)
 
-From this `Backend/` folder, with XAMPP PHP:
+From `Backend/`:
 
-```text
-C:\xampp\php\php.exe -S 127.0.0.1:8099 -t public public/router.php
+```bash
+php -S 127.0.0.1:8099 -t public
 ```
+
+Example endpoints:
 
 - `GET http://127.0.0.1:8099/api/health`
-- `GET http://127.0.0.1:8099/api/csrf` (starts session cookie `mq_sess`)
+- `GET http://127.0.0.1:8099/api/auth/csrf` (issues CSRF token + session cookie)
 
-Copy `.env.example` to `.env` and set `DB_*` when the database phase is applied.
+## Environment setup
 
-## XAMPP Apache
+1. Copy `.env.example` to `.env`
+2. Configure database credentials (`DB_*`)
+3. Keep `.env` private (already ignored by git)
 
-Point a vhost or alias so Frontend and `Backend/public` share scheme+host+port. Do not expose `src/`, `config/`, `storage/`, or `.env`. The parent `Backend/.htaccess` denies direct access; clients must use `public/`.
+## Database setup
 
-Install dependencies once:
+Use helper scripts from `Backend/bin/`:
 
-```text
-C:\xampp\php\php.exe composer.phar install
+```bash
+php bin/migrate.php
+php bin/seed.php
 ```
+
+## Apache/XAMPP notes
+
+- Serve frontend and API on the same origin when possible
+- Do not expose `src/`, `database/`, `storage/`, or `.env`
+- Use `Backend/public/index.php` as the entry point

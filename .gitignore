@@ -30,3 +30,7 @@ node_modules/
 !/Backend/storage/ratelimit/.gitkeep
 /Backend/storage/logs/*
 !/Backend/storage/logs/.gitkeep
+
+# Local merge/build artifacts
+.merge_tmp/
+*.zip
