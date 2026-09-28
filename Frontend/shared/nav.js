@@ -1,4 +1,5 @@
-import { getUser, clearUser } from "./store.js";
+import { getUser } from "./store.js";
+import { logout } from "./api.js";
 import { icon, refreshIcons } from "./icons.js";
 import { badge, btn } from "./ui.js";
 
@@ -74,11 +75,11 @@ export function mountNav(currentPageKey) {
     refreshIcons();
   }
 
-  root.addEventListener("click", (e) => {
+  root.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-nav-action]");
     if (!el) return;
     if (el.dataset.navAction === "logout") {
-      clearUser();
+      await logout();
       location.href = "../homepage/homepage.html";
     } else if (el.dataset.navAction === "toggle-mobile") {
       mobileOpen = !mobileOpen;

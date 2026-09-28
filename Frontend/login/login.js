@@ -1,7 +1,6 @@
 import { icon, refreshIcons } from "../shared/icons.js";
 import { btn, cyanGlow } from "../shared/ui.js";
-import { DOCTOR_EMAILS } from "../shared/data.js";
-import { getDoctors, setUser } from "../shared/store.js";
+import { login } from "../shared/api.js";
 import { mountNav } from "../shared/nav.js";
 
 mountNav("login");
@@ -82,39 +81,36 @@ document.getElementById("page-root").addEventListener("click", (e) => {
   render();
 });
 
-document.getElementById("page-root").addEventListener("submit", (e) => {
+document.getElementById("page-root").addEventListener("submit", async (e) => {
   const form = e.target.closest('[data-form="login"]');
   if (!form) return;
   e.preventDefault();
   captureDraft();
 
-  const { email, name, pass } = draft;
-  if (!email || !pass) { error = "Please fill in all fields."; render(); return; }
-  if (role === "patient" && !name.trim()) { error = "Please enter your name."; render(); return; }
+    const { email, pass } = draft;
+    if (!email || !pass) { error = "Please fill in all fields."; render(); return; }
 
-  const doctors = getDoctors();
-  let profile;
-  let destination;
+    try {
+      const user = await login(email.trim(), pass);
 
-  if (role === "patient") {
-    profile = {
-      name: name.trim(), email, phone: "", condition: "",
-      patientId: `PAT-${Math.floor(1000 + Math.random() * 9000)}`,
-      joinedDate: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-    };
-    destination = "../patient-dashboard/patient-dashboard.html";
-  } else if (role === "doctor") {
-    const doctorId = DOCTOR_EMAILS[email.toLowerCase().trim()] ?? doctors[0].id;
-    const doc = doctors.find((d) => d.id === doctorId) ?? doctors[0];
-    profile = { name: doc.name, email, phone: "", condition: "", patientId: "", joinedDate: "", doctorId: doc.id };
-    destination = "../doctor-dashboard/doctor-dashboard.html";
-  } else {
-    profile = { name: "Admin", email, phone: "", condition: "", patientId: "", joinedDate: "" };
-    destination = "../admin-dashboard/admin-dashboard.html";
-  }
+      if (user.role !== role) {
+        error = `This account belongs to ${user.role}. Please switch role tab.`;
+        render();
+        return;
+      }
 
-  setUser(role, profile);
-  location.href = destination;
+      const destinationByRole = {
+        patient: "../patient-dashboard/patient-dashboard.html",
+        doctor: "../doctor-dashboard/doctor-dashboard.html",
+        admin: "../admin-dashboard/admin-dashboard.html",
+      };
+
+      location.href = destinationByRole[user.role] || "../homepage/homepage.html";
+    } catch (err) {
+      error = err.message || "Login failed.";
+      render();
+    }
+
 });
 
 render();
