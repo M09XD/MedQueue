@@ -52,7 +52,7 @@ async function request(path, { method = "GET", body = null, auth = true } = {}) 
 
 export async function ensureCsrf() {
   if (csrfToken) return csrfToken;
-  const data = await request("/auth/csrf", { auth: false });
+  const data = await request("/csrf", { auth: false });
   csrfToken = data.csrfToken;
   return csrfToken;
 }
@@ -96,12 +96,12 @@ export async function me() {
 
 export async function fetchDoctors(specialtyId = null) {
   const query = specialtyId ? `?specialtyId=${encodeURIComponent(specialtyId)}` : "";
-  const data = await request(`/public/doctors${query}`, { auth: false });
+  const data = await request(`/doctors${query}`, { auth: false });
   return data.doctors;
 }
 
 export async function fetchSpecialties() {
-  const data = await request("/public/specialties", { auth: false });
+  const data = await request("/specialties", { auth: false });
   return data.specialties;
 }
 

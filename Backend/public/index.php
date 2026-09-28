@@ -2,40 +2,43 @@
 
 declare(strict_types=1);
 
-use MedQueue\Http\Cors;
-use MedQueue\Http\HttpException;
-use MedQueue\Http\JsonResponse;
-use MedQueue\Http\Request;
-use MedQueue\Http\Router;
-use MedQueue\Http\Session;
-use MedQueue\Support\Env;
+use MedQueue\Config\Environment;
+use MedQueue\Core\JsonResponse;
+use MedQueue\Core\Request;
+use MedQueue\Core\RequestContext;
 
 $root = dirname(__DIR__);
 
-require $root . '/vendor/autoload.php';
+/** @var MedQueue\Core\Kernel $kernel */
+$kernel = require $root . '/bootstrap.php';
 
-$envFile = is_readable($root . '/.env') ? $root . '/.env' : $root . '/.env.example';
-Env::load($envFile);
-
-if (Cors::handlePreflight()) {
-    return;
+$allowOrigin = trim((string) Environment::get('CORS_ORIGIN', ''));
+$requestOrigin = trim((string) ($_SERVER['HTTP_ORIGIN'] ?? ''));
+if ($allowOrigin === '') {
+    $allowOrigin = $requestOrigin !== '' ? $requestOrigin : '*';
 }
-Cors::apply();
+$allowCredentials = $allowOrigin !== '*';
 
-Session::start();
+header('Access-Control-Allow-Origin: ' . $allowOrigin);
+header('Access-Control-Allow-Credentials: ' . ($allowCredentials ? 'true' : 'false'));
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token, X-Requested-With, Idempotency-Key');
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Vary: Origin');
 
-$router = new Router();
-require $root . '/config/routes.php';
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 
 try {
     $request = Request::fromGlobals();
-    $response = $router->dispatch($request);
-} catch (HttpException $e) {
-    $response = $e->toResponse();
+    $response = $kernel->handle($request);
 } catch (Throwable $e) {
-    $debug = Env::bool('APP_DEBUG', false);
-    $message = $debug ? $e->getMessage() : 'Internal server error.';
-    $response = JsonResponse::error('server_error', $message, 500);
+    if (RequestContext::requestId() === '') {
+        RequestContext::setRequestId(bin2hex(random_bytes(8)));
+    }
+    $debug = (bool) Environment::get('APP_DEBUG', false);
+    $response = JsonResponse::error('INTERNAL_ERROR', $debug ? $e->getMessage() : 'Unexpected server error.', 500);
 }
 
 $response->send();

@@ -10,7 +10,7 @@ use MedQueue\Core\Router;
 
 const MEDQUEUE_BASE = __DIR__;
 
-date_default_timezone_set('UTC');
+date_default_timezone_set((string) Environment::get('APP_TIMEZONE', 'Asia/Dhaka'));
 
 spl_autoload_register(static function (string $class): void {
     $prefix = 'MedQueue\\';

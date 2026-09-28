@@ -125,25 +125,46 @@ final class Kernel
         $doctor = $this->doctorController();
         $admin = $this->adminController();
 
-        $router->add('GET', '/MedQueue/Backend/public/api/auth/csrf', [$auth, 'csrf']);
-        $router->add('POST', '/MedQueue/Backend/public/api/auth/register', [$auth, 'register'], ['rate:write']);
-        $router->add('POST', '/MedQueue/Backend/public/api/auth/login', [$auth, 'login'], ['rate:auth']);
-        $router->add('POST', '/MedQueue/Backend/public/api/auth/logout', [$auth, 'logout'], ['auth', 'csrf']);
-        $router->add('GET', '/MedQueue/Backend/public/api/auth/me', [$auth, 'me'], ['auth']);
+        $this->registerApiRoute($router, 'GET', '/health', static fn (Request $request): Response => JsonResponse::success([
+            'ok' => true,
+            'service' => 'medqueue',
+            'time' => gmdate('c'),
+        ]));
 
-        $router->add('GET', '/MedQueue/Backend/public/api/public/specialties', [$public, 'specialties']);
-        $router->add('GET', '/MedQueue/Backend/public/api/public/doctors', [$public, 'doctors']);
+        $this->registerApiRoute($router, 'GET', '/auth/csrf', [$auth, 'csrf']);
+        $this->registerApiRoute($router, 'POST', '/auth/register', [$auth, 'register'], ['rate:write']);
+        $this->registerApiRoute($router, 'POST', '/auth/login', [$auth, 'login'], ['rate:auth']);
+        $this->registerApiRoute($router, 'POST', '/auth/logout', [$auth, 'logout'], ['auth', 'csrf']);
+        $this->registerApiRoute($router, 'GET', '/auth/me', [$auth, 'me'], ['auth']);
 
-        $router->add('GET', '/MedQueue/Backend/public/api/patient/tokens', [$patient, 'tokens'], ['auth', 'role:patient']);
-        $router->add('POST', '/MedQueue/Backend/public/api/patient/tokens', [$patient, 'bookToken'], ['auth', 'role:patient', 'csrf', 'rate:write']);
-        $router->add('POST', '/MedQueue/Backend/public/api/patient/tokens/{tokenId}/cancel', [$patient, 'cancelToken'], ['auth', 'role:patient', 'csrf', 'rate:write']);
+        $this->registerApiRoute($router, 'GET', '/public/specialties', [$public, 'specialties']);
+        $this->registerApiRoute($router, 'GET', '/public/doctors', [$public, 'doctors']);
 
-        $router->add('GET', '/MedQueue/Backend/public/api/doctor/queue', [$doctor, 'queue'], ['auth', 'role:doctor']);
-        $router->add('POST', '/MedQueue/Backend/public/api/doctor/tokens/{tokenId}/transition', [$doctor, 'transition'], ['auth', 'role:doctor', 'csrf', 'rate:write']);
+        $this->registerApiRoute($router, 'GET', '/patient/tokens', [$patient, 'tokens'], ['auth', 'role:patient']);
+        $this->registerApiRoute($router, 'POST', '/patient/tokens', [$patient, 'bookToken'], ['auth', 'role:patient', 'csrf', 'rate:write']);
+        $this->registerApiRoute($router, 'POST', '/patient/tokens/{tokenId}/cancel', [$patient, 'cancelToken'], ['auth', 'role:patient', 'csrf', 'rate:write']);
 
-        $router->add('GET', '/MedQueue/Backend/public/api/admin/analytics', [$admin, 'analytics'], ['auth', 'role:admin']);
-        $router->add('GET', '/MedQueue/Backend/public/api/admin/reports', [$admin, 'reportMetadata'], ['auth', 'role:admin']);
-        $router->add('GET', '/MedQueue/Backend/public/api/admin/reports/{reportId}', [$admin, 'reportFull'], ['auth', 'role:admin']);
+        $this->registerApiRoute($router, 'GET', '/doctor/queue', [$doctor, 'queue'], ['auth', 'role:doctor']);
+        $this->registerApiRoute($router, 'POST', '/doctor/tokens/{tokenId}/transition', [$doctor, 'transition'], ['auth', 'role:doctor', 'csrf', 'rate:write']);
+
+        $this->registerApiRoute($router, 'GET', '/admin/analytics', [$admin, 'analytics'], ['auth', 'role:admin']);
+        $this->registerApiRoute($router, 'GET', '/admin/reports', [$admin, 'reportMetadata'], ['auth', 'role:admin']);
+        $this->registerApiRoute($router, 'GET', '/admin/reports/{reportId}', [$admin, 'reportFull'], ['auth', 'role:admin']);
+
+        // Backward-compatible aliases for earlier frontend/API paths.
+        $this->registerApiRoute($router, 'GET', '/csrf', [$auth, 'csrf']);
+        $this->registerApiRoute($router, 'GET', '/specialties', [$public, 'specialties']);
+        $this->registerApiRoute($router, 'GET', '/doctors', [$public, 'doctors']);
+    }
+
+    private function registerApiRoute(Router $router, string $method, string $path, callable $handler, array $middleware = []): void
+    {
+        $normalized = '/' . ltrim($path, '/');
+        $prefixes = ['/api', '/Backend/public/api', '/MedQueue/Backend/public/api'];
+
+        foreach ($prefixes as $prefix) {
+            $router->add($method, $prefix . $normalized, $handler, $middleware);
+        }
     }
 
     private function session(): SessionManager

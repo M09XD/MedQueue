@@ -14,7 +14,7 @@ final class SessionManager
             return;
         }
 
-        $secureCookie = (bool) Environment::get('SESSION_SECURE_COOKIE', false);
+        $secureCookie = (bool) Environment::get('SESSION_SECURE_COOKIE', (bool) Environment::get('SESSION_SECURE', false));
         $sameSite = (string) Environment::get('SESSION_SAMESITE', 'Lax');
         $lifetime = (int) Environment::get('SESSION_LIFETIME', 7200);
 

@@ -178,7 +178,13 @@ Browser
         └── Unsplash doctor photos
 ```
 
-Frontend pages now call backend REST-style JSON endpoints through `Frontend/shared/api.js`. WebSockets are still not used; queue updates are currently polling/timer-based.
+Frontend pages call backend REST-style JSON endpoints through `Frontend/shared/api.js`.
+
+- The **canonical backend runtime** is `Backend/public/index.php`.
+- The **canonical API base** is `/api` (often reached as `/Backend/public/api` in local XAMPP paths).
+- Queue/auth state is now server-authoritative for migrated flows.
+
+WebSockets are still not used; queue updates are currently polling/timer-based.
 
 ## User Roles
 
@@ -253,6 +259,25 @@ Visit [http://localhost:8000](http://localhost:8000) (or the port shown by your 
 | Book a token | Log in as patient → **My Queue** → pick specialty and doctor, or use **Doctors** → **Get Token** |
 | Log in as doctor | **Log in** → **doctor** tab → email `sarah.chen@medqueue.hospital` → any password |
 | Log in as admin | **Log in** → **admin** tab → any email and password |
+
+## Canonical Backend Runtime & API Contract
+
+- Web root: `Backend/public/`
+- Runtime entry point: `Backend/public/index.php`
+- Migration source of truth: `Backend/database/migrations/*.sql`
+- Seed source of truth: `Backend/database/seeds/*.sql`
+
+Core endpoint groups:
+- Auth: `/api/auth/*`
+- Public: `/api/public/*`
+- Patient: `/api/patient/*`
+- Doctor: `/api/doctor/*`
+- Admin: `/api/admin/*`
+
+Compatibility aliases currently kept:
+- `/api/csrf` → `/api/auth/csrf`
+- `/api/doctors` → `/api/public/doctors`
+- `/api/specialties` → `/api/public/specialties`
 
 ## Project Structure
 

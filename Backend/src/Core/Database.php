@@ -19,7 +19,7 @@ final class Database
         $port = (string) Environment::get('DB_PORT', '3306');
         $name = (string) Environment::get('DB_NAME', 'medqueue');
         $user = (string) Environment::get('DB_USER', 'root');
-        $pass = (string) Environment::get('DB_PASSWORD', '');
+        $pass = (string) Environment::get('DB_PASSWORD', (string) Environment::get('DB_PASS', ''));
 
         $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 
