@@ -12,6 +12,7 @@ desktop.ini
 # Environment / secrets
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 
@@ -19,5 +20,13 @@ desktop.ini
 *.log
 npm-debug.log*
 
-# Dependencies (if added later)
+# Dependencies
 node_modules/
+/Backend/vendor/
+/Backend/composer.phar
+
+# Rate-limit files (keep directory)
+/Backend/storage/ratelimit/*
+!/Backend/storage/ratelimit/.gitkeep
+/Backend/storage/logs/*
+!/Backend/storage/logs/.gitkeep

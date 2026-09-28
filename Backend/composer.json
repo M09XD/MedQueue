@@ -1,0 +1,14 @@
+{
+    "name": "medqueue/backend",
+    "description": "MedQueue JSON API — frameworkless PHP for XAMPP",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "MedQueue\\": "src/"
+        }
+    }
+}

@@ -1,1 +1,4 @@
-Require all denied
+# Block HTTP access to everything under Backend/ except public/
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
