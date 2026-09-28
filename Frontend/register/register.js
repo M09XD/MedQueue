@@ -1,6 +1,6 @@
 import { icon, refreshIcons } from "../shared/icons.js";
 import { btn, cyanGlow } from "../shared/ui.js";
-import { setUser } from "../shared/store.js";
+import { register } from "../shared/api.js";
 import { mountNav } from "../shared/nav.js";
 
 mountNav("register");
@@ -8,6 +8,7 @@ mountNav("register");
 let step = 1;
 let form = { name: "", email: "", phone: "", pass: "", condition: "" };
 let errors = {};
+let submitError = "";
 
 function captureStep1() {
   ["name", "email", "phone", "pass"].forEach((id) => {
@@ -56,6 +57,7 @@ function render() {
           <textarea class="input" id="reg-condition" rows="3" placeholder="Briefly describe any existing condition or reason for visit...">${form.condition}</textarea>
         </div>
         <p class="xs faint">Your data is encrypted and only visible to your treating physician.</p>
+        ${submitError ? `<p class="error-banner" role="alert">${icon("alert-triangle", "ic-sm")} ${submitError}</p>` : ""}
         ${btn({ label: `${icon("user-check", "ic-sm")} Create Account`, variant: "primary", size: "lg", block: true, type: "submit" })}
         ${btn({ label: "← Back", variant: "ghost", size: "md", block: true, attrs: 'data-action="back"' })}
       `;
@@ -98,22 +100,26 @@ document.getElementById("page-root").addEventListener("click", (e) => {
   }
 });
 
-document.getElementById("page-root").addEventListener("submit", (e) => {
+document.getElementById("page-root").addEventListener("submit", async (e) => {
   const form_ = e.target.closest('[data-form="register"]');
   if (!form_) return;
   e.preventDefault();
   captureCondition();
 
-  const profile = {
-    name: form.name.trim(),
-    email: form.email,
-    phone: form.phone,
-    condition: form.condition,
-    patientId: `PAT-${Math.floor(1000 + Math.random() * 9000)}`,
-    joinedDate: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-  };
-  setUser("patient", profile);
-  location.href = "../patient-dashboard/patient-dashboard.html";
+  submitError = "";
+  try {
+    await register({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      password: form.pass,
+      condition: form.condition.trim() || null,
+    });
+    location.href = "../patient-dashboard/patient-dashboard.html";
+  } catch (err) {
+    submitError = err.message || "Registration failed.";
+    render();
+  }
 });
 
 render();
