@@ -27,6 +27,15 @@ use MedQueue\Services\QueueService;
 
 final class Kernel
 {
+    /** Endpoints still allowed while a temporary password is pending change. */
+    private const PASSWORD_CHANGE_PATH_SUFFIXES = [
+        '/auth/me',
+        '/auth/logout',
+        '/auth/change-password',
+        '/auth/csrf',
+        '/csrf',
+    ];
+
     public function __construct(private readonly Container $container)
     {
     }
@@ -47,6 +56,21 @@ final class Kernel
                 if ($user === null) {
                     return JsonResponse::error('UNAUTHENTICATED', 'Login required.', 401);
                 }
+
+                $row = $this->users()->findById((int) ($user['id'] ?? 0));
+                if ($row === null || ($row['status'] ?? 'inactive') !== 'active') {
+                    $session->destroy();
+                    return JsonResponse::error('UNAUTHENTICATED', 'Your session is no longer valid. Please log in again.', 401);
+                }
+
+                $user['email'] = (string) $row['email'];
+                $user['role'] = (string) $row['role'];
+                $user['mustChangePassword'] = (bool) ($row['must_change_password'] ?? false);
+
+                if (($user['mustChangePassword'] ?? false) && !$this->isPasswordChangeAllowedPath($req->path)) {
+                    return JsonResponse::error('PASSWORD_CHANGE_REQUIRED', 'Please change your temporary password first.', 403);
+                }
+
                 return $next($req->withUser($user));
             },
             'role:patient' => function (Request $req, \Closure $next): Response {
@@ -136,6 +160,7 @@ final class Kernel
         $this->registerApiRoute($router, 'POST', '/auth/login', [$auth, 'login'], ['rate:auth']);
         $this->registerApiRoute($router, 'POST', '/auth/logout', [$auth, 'logout'], ['auth', 'csrf']);
         $this->registerApiRoute($router, 'GET', '/auth/me', [$auth, 'me'], ['auth']);
+        $this->registerApiRoute($router, 'POST', '/auth/change-password', [$auth, 'changePassword'], ['auth', 'csrf', 'rate:write']);
 
         $this->registerApiRoute($router, 'GET', '/public/specialties', [$public, 'specialties']);
         $this->registerApiRoute($router, 'GET', '/public/doctors', [$public, 'doctors']);
@@ -145,7 +170,10 @@ final class Kernel
         $this->registerApiRoute($router, 'POST', '/patient/tokens/{tokenId}/cancel', [$patient, 'cancelToken'], ['auth', 'role:patient', 'csrf', 'rate:write']);
 
         $this->registerApiRoute($router, 'GET', '/doctor/queue', [$doctor, 'queue'], ['auth', 'role:doctor']);
+        $this->registerApiRoute($router, 'GET', '/doctor/history', [$doctor, 'history'], ['auth', 'role:doctor']);
         $this->registerApiRoute($router, 'POST', '/doctor/tokens/{tokenId}/transition', [$doctor, 'transition'], ['auth', 'role:doctor', 'csrf', 'rate:write']);
+        $this->registerApiRoute($router, 'POST', '/doctor/tokens/{tokenId}/emergency', [$doctor, 'emergency'], ['auth', 'role:doctor', 'csrf', 'rate:write']);
+        $this->registerApiRoute($router, 'PATCH', '/doctor/availability', [$doctor, 'availability'], ['auth', 'role:doctor', 'csrf', 'rate:write']);
 
         $this->registerApiRoute($router, 'GET', '/admin/analytics', [$admin, 'analytics'], ['auth', 'role:admin']);
         $this->registerApiRoute($router, 'GET', '/admin/reports', [$admin, 'reportMetadata'], ['auth', 'role:admin']);
@@ -165,6 +193,17 @@ final class Kernel
         foreach ($prefixes as $prefix) {
             $router->add($method, $prefix . $normalized, $handler, $middleware);
         }
+    }
+
+    private function isPasswordChangeAllowedPath(string $path): bool
+    {
+        foreach (self::PASSWORD_CHANGE_PATH_SUFFIXES as $suffix) {
+            if (str_ends_with($path, $suffix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function session(): SessionManager

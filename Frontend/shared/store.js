@@ -1,12 +1,9 @@
-import { INITIAL_DOCTORS, SPECIALTIES } from "./data.js";
+// Browser storage is used ONLY for non-sensitive UX hints. The server session (HttpOnly cookie)
+// is the real source of truth; nothing here grants access to anything.
 
 const KEYS = {
-  user: "medqueue.user", // cached session user for UX-only routing
-  pendingDoctorId: "medqueue.pendingDoctorId",
-  doctors: "medqueue.doctors",
-  specialties: "medqueue.specialties",
-  patientTokens: "medqueue.patientTokens",
-  doctorSession: "medqueue.doctorSession",
+  user: "medqueue.user", // { role, name } - lets the nav bar draw the right links before the server answers
+  pendingDoctorId: "medqueue.pendingDoctorId", // Doctors page -> Patient Dashboard hand-off
 };
 
 function readJSON(key, fallback) {
@@ -19,46 +16,27 @@ function readJSON(key, fallback) {
 }
 
 function writeJSON(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage unavailable (private mode / quota): the app still works, just without the hint */
+  }
 }
 
 export function getUser() {
   return readJSON(KEYS.user, null);
 }
 
-export function setUser(role, profile, raw = null) {
-  writeJSON(KEYS.user, { role, profile, raw });
+export function setUser(user) {
+  writeJSON(KEYS.user, { role: user.role, name: user.profile?.name ?? "" });
 }
 
 export function clearUser() {
-  localStorage.removeItem(KEYS.user);
-}
-
-// Legacy local caches retained temporarily until all pages are fully API-backed.
-export function getDoctors() {
-  let list = readJSON(KEYS.doctors, null);
-  if (!list) {
-    list = INITIAL_DOCTORS.map((d) => ({ ...d }));
-    writeJSON(KEYS.doctors, list);
+  try {
+    localStorage.removeItem(KEYS.user);
+  } catch {
+    /* ignore */
   }
-  return list;
-}
-
-export function setDoctors(list) {
-  writeJSON(KEYS.doctors, list);
-}
-
-export function getSpecialties() {
-  let list = readJSON(KEYS.specialties, null);
-  if (!list) {
-    list = [...SPECIALTIES];
-    writeJSON(KEYS.specialties, list);
-  }
-  return list;
-}
-
-export function setSpecialties(list) {
-  writeJSON(KEYS.specialties, list);
 }
 
 export function getPendingDoctorId() {
@@ -70,39 +48,9 @@ export function setPendingDoctorId(id) {
 }
 
 export function clearPendingDoctorId() {
-  localStorage.removeItem(KEYS.pendingDoctorId);
-}
-
-export function getPatientTokens() {
-  return readJSON(KEYS.patientTokens, []);
-}
-
-export function setPatientTokens(list) {
-  writeJSON(KEYS.patientTokens, list);
-}
-
-export function getDoctorSession(doctorId) {
-  const all = readJSON(KEYS.doctorSession, {});
-  return all[doctorId] || null;
-}
-
-export function setDoctorSession(doctorId, session) {
-  const all = readJSON(KEYS.doctorSession, {});
-  all[doctorId] = session;
-  writeJSON(KEYS.doctorSession, all);
-}
-
-export function clearDoctorSession(doctorId) {
-  const all = readJSON(KEYS.doctorSession, {});
-  delete all[doctorId];
-  writeJSON(KEYS.doctorSession, all);
-}
-
-export function requireRole(...allowedRoles) {
-  const user = getUser();
-  if (!user || !allowedRoles.includes(user.role)) {
-    location.href = "../login/login.html";
-    return null;
+  try {
+    localStorage.removeItem(KEYS.pendingDoctorId);
+  } catch {
+    /* ignore */
   }
-  return user;
 }
