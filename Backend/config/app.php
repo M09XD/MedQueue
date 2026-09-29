@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use MedQueue\Support\Env;
+use MedQueue\Config\Environment;
 
 return [
-    'name' => Env::get('APP_NAME', 'MedQueue'),
-    'env' => Env::get('APP_ENV', 'local'),
-    'debug' => Env::bool('APP_DEBUG', false),
-    'url' => Env::get('APP_URL', 'http://localhost'),
+    'name' => Environment::get('APP_NAME', 'MedQueue'),
+    'env' => Environment::get('APP_ENV', 'local'),
+    'debug' => (bool) Environment::get('APP_DEBUG', false),
+    'url' => Environment::get('APP_URL', 'http://localhost'),
 ];

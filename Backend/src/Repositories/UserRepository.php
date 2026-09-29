@@ -15,7 +15,7 @@ final class UserRepository
 
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->db->pdo()->prepare('SELECT id, email, password_hash, role, status FROM users WHERE email = :email LIMIT 1');
+        $stmt = $this->db->pdo()->prepare('SELECT id, email, password_hash, role, status, must_change_password FROM users WHERE email = :email LIMIT 1');
         $stmt->execute(['email' => mb_strtolower($email)]);
         $row = $stmt->fetch();
         return $row ?: null;
@@ -23,10 +23,30 @@ final class UserRepository
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->db->pdo()->prepare('SELECT id, email, role, status FROM users WHERE id = :id LIMIT 1');
+        $stmt = $this->db->pdo()->prepare('SELECT id, email, role, status, must_change_password FROM users WHERE id = :id LIMIT 1');
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
         return $row ?: null;
+    }
+
+    public function passwordHash(int $id): ?string
+    {
+        $stmt = $this->db->pdo()->prepare('SELECT password_hash FROM users WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $hash = $stmt->fetchColumn();
+        return is_string($hash) ? $hash : null;
+    }
+
+    public function updatePassword(int $id, string $hash): void
+    {
+        $stmt = $this->db->pdo()->prepare('UPDATE users SET password_hash = :hash, must_change_password = 0, updated_at = UTC_TIMESTAMP() WHERE id = :id');
+        $stmt->execute(['hash' => $hash, 'id' => $id]);
+    }
+
+    public function touchLogin(int $id): void
+    {
+        $stmt = $this->db->pdo()->prepare('UPDATE users SET last_login_at = UTC_TIMESTAMP() WHERE id = :id');
+        $stmt->execute(['id' => $id]);
     }
 
     public function createPatient(string $email, string $passwordHash, string $name, string $phone, ?string $condition): int
@@ -34,7 +54,7 @@ final class UserRepository
         $pdo = $this->db->pdo();
         $pdo->beginTransaction();
 
-        $stmtUser = $pdo->prepare('INSERT INTO users (email, password_hash, role, status, created_at, updated_at) VALUES (:email, :password_hash, :role, :status, UTC_TIMESTAMP(), UTC_TIMESTAMP())');
+        $stmtUser = $pdo->prepare('INSERT INTO users (email, password_hash, role, status, must_change_password, created_at, updated_at) VALUES (:email, :password_hash, :role, :status, 0, UTC_TIMESTAMP(), UTC_TIMESTAMP())');
         $stmtUser->execute([
             'email' => mb_strtolower($email),
             'password_hash' => $passwordHash,

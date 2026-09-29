@@ -44,7 +44,7 @@ final class DoctorRepository
 
     public function doctorQueue(int $doctorId): array
     {
-        $stmt = $this->db->pdo()->prepare('SELECT qt.id, qt.token_number, qt.status, qt.is_emergency, qt.estimated_wait_minutes, qt.created_at, qt.called_at,
+        $stmt = $this->db->pdo()->prepare('SELECT qt.id, qt.token_number, qt.status, qt.is_emergency, qt.estimated_wait_minutes, qt.created_at, qt.called_at, qt.started_at,
                                                  p.patient_code, p.full_name AS patient_name
                                           FROM queue_tokens qt
                                           INNER JOIN patients p ON p.user_id = qt.patient_user_id
@@ -53,4 +53,41 @@ final class DoctorRepository
         $stmt->execute(['doctor_id' => $doctorId]);
         return $stmt->fetchAll();
     }
+
+    public function doctorHistory(int $doctorId): array
+    {
+        $stmt = $this->db->pdo()->prepare('SELECT qt.id, qt.token_number, qt.status, qt.completed_at, qt.updated_at,
+                                                  p.full_name AS patient_name
+                                           FROM queue_tokens qt
+                                           INNER JOIN patients p ON p.user_id = qt.patient_user_id
+                                           WHERE qt.doctor_id = :doctor_id AND qt.status IN ("completed", "skipped")
+                                           ORDER BY qt.updated_at DESC');
+        $stmt->execute(['doctor_id' => $doctorId]);
+        return $stmt->fetchAll();
+    }
+
+    public function markEmergency(int $doctorId, int $tokenId): bool
+    {
+        $stmt = $this->db->pdo()->prepare('UPDATE queue_tokens
+                                           SET is_emergency = 1, updated_at = UTC_TIMESTAMP()
+                                           WHERE id = :id AND doctor_id = :doctor_id AND status = "waiting"');
+        $stmt->execute(['id' => $tokenId, 'doctor_id' => $doctorId]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function updateAvailability(int $doctorId, bool $available, string $workStart, string $workEnd): bool
+    {
+        $stmt = $this->db->pdo()->prepare('UPDATE doctors
+                                           SET is_available = :available, work_start = :work_start, work_end = :work_end, updated_at = UTC_TIMESTAMP()
+                                           WHERE id = :id');
+        $stmt->execute([
+            'available' => $available ? 1 : 0,
+            'work_start' => $workStart,
+            'work_end' => $workEnd,
+            'id' => $doctorId,
+        ]);
+
+        return $stmt->rowCount() > 0;
+    }
 }
+

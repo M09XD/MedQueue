@@ -25,21 +25,18 @@ final class AuthService
             throw new \RuntimeException('EMAIL_EXISTS');
         }
 
-        $hash = $this->hasher->hash($password);
-        $userId = $this->users->createPatient($email, $hash, $name, $phone, $condition);
+        try {
+            $hash = $this->hasher->hash($password);
+            $userId = $this->users->createPatient($email, $hash, $name, $phone, $condition);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23000') {
+                throw new \RuntimeException('EMAIL_EXISTS');
+            }
+            throw $e;
+        }
 
-        $user = $this->users->findById($userId);
-        $profile = $this->users->patientProfile($userId);
-
-        $sessionUser = [
-            'id' => $userId,
-            'email' => $user['email'],
-            'role' => $user['role'],
-            'profile' => [
-                'name' => $profile['full_name'],
-                'patientId' => $profile['patient_code'],
-            ],
-        ];
+        $user = $this->users->findById($userId) ?? [];
+        $sessionUser = $this->buildSessionUser($user);
 
         $this->session->login($sessionUser);
         $this->audit->record($userId, 'auth.register', 'user', $userId);
@@ -51,25 +48,57 @@ final class AuthService
     {
         $user = $this->users->findByEmail($email);
 
-        if (!$user || $user['status'] !== 'active' || !$this->hasher->verify($password, $user['password_hash'])) {
-            $this->audit->record(null, 'auth.login_failed', 'user', null, ['email' => mb_strtolower($email)]);
+        if ($user === null) {
+            // keep response timing closer to the wrong-password path.
+            $this->hasher->hash($password);
+            $this->audit->record(null, 'auth.login_failed', 'user', null);
             throw new \RuntimeException('INVALID_CREDENTIALS');
         }
 
-        $profile = null;
-        if ($user['role'] === 'patient') {
-            $profile = $this->users->patientProfile((int) $user['id']);
+        if ($user['status'] !== 'active' || !$this->hasher->verify($password, (string) $user['password_hash'])) {
+            $this->audit->record((int) $user['id'], 'auth.login_failed', 'user', (int) $user['id']);
+            throw new \RuntimeException('INVALID_CREDENTIALS');
+        }
+
+        $sessionUser = $this->buildSessionUser($user);
+
+        $this->session->login($sessionUser);
+        $this->users->touchLogin((int) $user['id']);
+        $this->audit->record((int) $user['id'], 'auth.login', 'user', (int) $user['id']);
+
+        return $sessionUser;
+    }
+
+    public function changePassword(int $userId, string $current, string $new): void
+    {
+        $hash = $this->users->passwordHash($userId);
+        if ($hash === null || !$this->hasher->verify($current, $hash)) {
+            throw new \RuntimeException('INVALID_CREDENTIALS');
+        }
+
+        $this->users->updatePassword($userId, $this->hasher->hash($new));
+        $this->audit->record($userId, 'auth.password_changed', 'user', $userId);
+    }
+
+    private function buildSessionUser(array $user): array
+    {
+        $id = (int) $user['id'];
+        $role = (string) $user['role'];
+        $profile = ['name' => 'Admin'];
+
+        if ($role === 'patient') {
+            $patient = $this->users->patientProfile($id) ?? throw new \RuntimeException('PROFILE_MISSING');
             $profile = [
-                'name' => $profile['full_name'],
-                'patientId' => $profile['patient_code'],
-                'phone' => $profile['phone'],
-                'condition' => $profile['condition_text'],
-                'joinedAt' => $profile['joined_at'],
+                'name' => $patient['full_name'],
+                'patientId' => $patient['patient_code'],
+                'phone' => $patient['phone'],
+                'condition' => $patient['condition_text'],
+                'joinedAt' => $patient['joined_at'],
             ];
-        } elseif ($user['role'] === 'doctor') {
-            $doc = $this->users->doctorProfile((int) $user['id']);
-            if (!$doc) {
-                throw new \RuntimeException('DOCTOR_PROFILE_MISSING');
+        } elseif ($role === 'doctor') {
+            $doc = $this->users->doctorProfile($id) ?? throw new \RuntimeException('PROFILE_MISSING');
+            if ((int) ($doc['is_active'] ?? 0) !== 1) {
+                throw new \RuntimeException('INVALID_CREDENTIALS');
             }
             $profile = [
                 'doctorId' => (int) $doc['doctor_id'],
@@ -77,20 +106,14 @@ final class AuthService
                 'specialty' => $doc['specialty'],
                 'room' => $doc['room_no'],
             ];
-        } else {
-            $profile = ['name' => 'Admin'];
         }
 
-        $sessionUser = [
-            'id' => (int) $user['id'],
+        return [
+            'id' => $id,
             'email' => $user['email'],
-            'role' => $user['role'],
+            'role' => $role,
+            'mustChangePassword' => (bool) ($user['must_change_password'] ?? false),
             'profile' => $profile,
         ];
-
-        $this->session->login($sessionUser);
-        $this->audit->record((int) $user['id'], 'auth.login', 'user', (int) $user['id']);
-
-        return $sessionUser;
     }
 }
